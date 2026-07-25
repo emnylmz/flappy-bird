@@ -672,12 +672,18 @@ if (socket) {
     });
 
     socket.on('playersUpdate', (players) => {
-        otherPlayers = players;
+        const newOther = {};
+        for (let id in players) {
+            if (id !== socket.id) {
+                newOther[id] = players[id];
+            }
+        }
+        otherPlayers = newOther;
         renderMultiplayerWidget();
     });
 
     socket.on('playerMoved', (playerData) => {
-        if (otherPlayers[playerData.id]) {
+        if (playerData && playerData.id && playerData.id !== socket.id) {
             otherPlayers[playerData.id] = playerData;
             renderMultiplayerWidget();
         }
