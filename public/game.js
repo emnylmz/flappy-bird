@@ -175,7 +175,9 @@ const assets = {
         golden: new Image(),
         cyber: new Image(),
         dragon: new Image(),
-        classic: new Image()
+        classic: new Image(),
+        senasal: new Image(),
+        phoenix: new Image()
     }
 };
 
@@ -189,6 +191,8 @@ assets.rawBirds.golden.src = 'assets/bird_golden.png';
 assets.rawBirds.cyber.src = 'assets/bird_cyber.png';
 assets.rawBirds.dragon.src = 'assets/bird_dragon.png';
 assets.rawBirds.classic.src = 'assets/bird_golden.png';
+assets.rawBirds.senasal.src = 'assets/bird_senasal.png';
+assets.rawBirds.phoenix.src = 'assets/bird_phoenix.png';
 
 function createTransparentSprite(imgKey, rawImg) {
     rawImg.onload = () => {
@@ -227,22 +231,26 @@ function createTransparentSprite(imgKey, rawImg) {
     };
 }
 
+createTransparentSprite('senasal', assets.rawBirds.senasal);
 createTransparentSprite('golden', assets.rawBirds.golden);
 createTransparentSprite('cyber', assets.rawBirds.cyber);
 createTransparentSprite('dragon', assets.rawBirds.dragon);
 createTransparentSprite('classic', assets.rawBirds.classic);
+createTransparentSprite('phoenix', assets.rawBirds.phoenix);
 
 const CHAR_INFO = {
+    senasal: { name: "Senasal Fena", icon: "🎀", color: "#ff69b4" },
     golden: { name: "Altın Anka", icon: "✨", color: "#ffd700" },
     cyber: { name: "Siber Kuş", icon: "⚡", color: "#00f3ff" },
     dragon: { name: "Ejderha Kuşu", icon: "🔥", color: "#2ed573" },
+    phoenix: { name: "Alevli Anka", icon: "🔥", color: "#ff4500" },
     classic: { name: "Klasik Kuş", icon: "🐣", color: "#fffa65" }
 };
 
 // --- OYUN DURUMU & FİZİK ---
 let gameMode = 'MENU';
 let playerName = '';
-let selectedChar = 'golden';
+let selectedChar = 'senasal';
 let score = 0;
 let personalBest = localStorage.getItem('flappy_pb') ? parseInt(localStorage.getItem('flappy_pb')) : 0;
 let bgX = 0;

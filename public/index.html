@@ -591,6 +591,17 @@
             font-weight: 700;
             color: #ffffff;
         }
+        .badge-senasal {
+            background: rgba(255, 105, 180, 0.25);
+            color: #ff69b4;
+            border: 1px solid #ff69b4;
+        }
+
+        .badge-phoenix {
+            background: rgba(255, 69, 0, 0.25);
+            color: #ff4500;
+            border: 1px solid #ff4500;
+        }
     </style>
 </head>
 <body>
@@ -646,7 +657,12 @@
 
             <div class="character-section-title">Karakter Seçimi</div>
             <div class="character-grid">
-                <div class="char-card selected" data-char="golden">
+                <div class="char-card selected" data-char="senasal">
+                    <img src="assets/bird_senasal.png" alt="Senasal Fena">
+                    <span class="char-badge badge-senasal">🎀 Hello Kitty</span>
+                    <div class="char-name">Senasal Fena</div>
+                </div>
+                <div class="char-card" data-char="golden">
                     <img src="assets/bird_golden.png" alt="Altın Anka">
                     <span class="char-badge badge-golden">✨ Altın Işık</span>
                     <div class="char-name">Altın Anka</div>
@@ -661,10 +677,10 @@
                     <span class="char-badge badge-dragon">🔥 Ejder Ateşi</span>
                     <div class="char-name">Ejderha Kuşu</div>
                 </div>
-                <div class="char-card" data-char="classic">
-                    <img src="assets/bird_golden.png" style="filter: hue-rotate(180deg);" alt="Klasik Kuş">
-                    <span class="char-badge badge-classic">🐣 Klasik Tüy</span>
-                    <div class="char-name">Klasik Kuş</div>
+                <div class="char-card" data-char="phoenix">
+                    <img src="assets/bird_phoenix.png" alt="Alevli Anka">
+                    <span class="char-badge badge-phoenix">🔥 Alev Gücü</span>
+                    <div class="char-name">Alevli Anka</div>
                 </div>
             </div>
 
