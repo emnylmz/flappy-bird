@@ -237,7 +237,8 @@ loadAndProcessBird('dragon', 'assets/bird_dragon.png');
 loadAndProcessBird('classic', 'assets/bird_golden.png');
 loadAndProcessBird('phoenix', 'assets/bird_phoenix.png');
 
-assets.bgs.emin_sena.src = 'assets/bg.jpg';
+assets.bgs.emin_sena.src = 'assets/bg.png';
+assets.bgs.sky.src = 'assets/bg.png';
 assets.bgs.cyberpunk.src = 'assets/bg_cyberpunk.png';
 assets.bgs.space.src = 'assets/bg_space.png';
 assets.pipe.src = 'assets/pipe.png';
@@ -287,6 +288,7 @@ let particles = [];
 let floatTexts = [];
 let otherPlayers = {};
 let frameCount = 0;
+let lastTimestamp = 0;
 let ignoreJumpUntil = 0;
 let selectedBg = 'emin_sena';
 
