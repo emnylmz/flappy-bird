@@ -557,6 +557,40 @@
             color: #2ed573;
             box-shadow: 0 0 12px rgba(46, 213, 115, 0.5);
         }
+        .bg-theme-grid {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            width: 100%;
+        }
+
+        .bg-card {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.25s ease;
+        }
+
+        .bg-card.selected {
+            border-color: var(--cyber-cyan);
+            background: rgba(0, 243, 255, 0.15);
+            box-shadow: 0 0 12px rgba(0, 243, 255, 0.4);
+        }
+
+        .bg-preview {
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+
+        .bg-name {
+            font-size: 11px;
+            font-weight: 700;
+            color: #ffffff;
+        }
     </style>
 </head>
 <body>
@@ -602,7 +636,7 @@
         <!-- START MENU MODAL -->
         <div id="startModal" class="modal">
             <h1 class="game-title">FLAPPY BIRD PRO</h1>
-            <p class="subtitle">Karakterini Seç, Özel Güçleri Topla!</p>
+            <p class="subtitle">Karakterini ve Arkaplanını Seç, Özel Güçleri Topla!</p>
 
             <div class="input-group">
                 <label for="playerNameInput">Oyuncu Takma Adınız *</label>
@@ -631,6 +665,22 @@
                     <img src="assets/bird_golden.png" style="filter: hue-rotate(180deg);" alt="Klasik Kuş">
                     <span class="char-badge badge-classic">🐣 Klasik Tüy</span>
                     <div class="char-name">Klasik Kuş</div>
+                </div>
+            </div>
+
+            <div class="character-section-title">Arkaplan Teması Seçimi</div>
+            <div class="bg-theme-grid">
+                <div class="bg-card selected" data-bg="sky">
+                    <div class="bg-preview">🌤️</div>
+                    <div class="bg-name">Mavi Gökyüzü</div>
+                </div>
+                <div class="bg-card" data-bg="cyberpunk">
+                    <div class="bg-preview">🏙️</div>
+                    <div class="bg-name">Siber Gece</div>
+                </div>
+                <div class="bg-card" data-bg="space">
+                    <div class="bg-preview">🌌</div>
+                    <div class="bg-name">Kozmik Uzay</div>
                 </div>
             </div>
 

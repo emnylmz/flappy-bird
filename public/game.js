@@ -165,6 +165,11 @@ const sounds = new SoundEngine();
 // --- VARLIKLAR ---
 const assets = {
     bg: new Image(),
+    bgs: {
+        sky: new Image(),
+        cyberpunk: new Image(),
+        space: new Image()
+    },
     pipe: new Image(),
     rawBirds: {
         golden: new Image(),
@@ -176,7 +181,9 @@ const assets = {
 
 const processedSprites = {};
 
-assets.bg.src = 'assets/bg.png';
+assets.bgs.sky.src = 'assets/bg.png';
+assets.bgs.cyberpunk.src = 'assets/bg_cyberpunk.png';
+assets.bgs.space.src = 'assets/bg_space.png';
 assets.pipe.src = 'assets/pipe.png';
 assets.rawBirds.golden.src = 'assets/bird_golden.png';
 assets.rawBirds.cyber.src = 'assets/bird_cyber.png';
@@ -270,11 +277,22 @@ let otherPlayers = {};
 let frameCount = 0;
 let lastTimestamp = performance.now();
 
+let selectedChar = 'golden';
+let selectedBg = 'sky';
+
 document.querySelectorAll('.char-card').forEach(card => {
     card.addEventListener('click', () => {
         document.querySelectorAll('.char-card').forEach(c => c.classList.remove('selected'));
         card.classList.add('selected');
         selectedChar = card.getAttribute('data-char');
+    });
+});
+
+document.querySelectorAll('.bg-card').forEach(card => {
+    card.addEventListener('click', () => {
+        document.querySelectorAll('.bg-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        selectedBg = card.getAttribute('data-bg');
     });
 });
 
@@ -1030,10 +1048,11 @@ function update(dt) {
 function render() {
     ctx.clearRect(0, 0, 480, 640);
 
-    // 1. Arkaplan
-    if (assets.bg.complete && assets.bg.naturalWidth > 0) {
-        ctx.drawImage(assets.bg, bgX, 0, 480, 640);
-        ctx.drawImage(assets.bg, bgX + 480, 0, 480, 640);
+    // 1. Seçilen Arkaplan Teması
+    const currentBgImg = assets.bgs[selectedBg] || assets.bgs.sky;
+    if (currentBgImg.complete && currentBgImg.naturalWidth > 0) {
+        ctx.drawImage(currentBgImg, bgX, 0, 480, 640);
+        ctx.drawImage(currentBgImg, bgX + 480, 0, 480, 640);
     } else {
         const skyGradient = ctx.createLinearGradient(0, 0, 0, 640);
         skyGradient.addColorStop(0, '#70c5ce');
@@ -1060,26 +1079,7 @@ function render() {
     // 5. Hafif Parçacıklar
     particles.forEach(p => p.draw(ctx));
 
-    // 6. Canlı Oyuncular
-    if (socket) {
-        for (let id in otherPlayers) {
-            if (id !== socket.id && otherPlayers[id].isAlive) {
-                const op = otherPlayers[id];
-                ctx.save();
-                ctx.globalAlpha = 0.5;
-                ctx.fillStyle = '#ffffff';
-                ctx.beginPath();
-                ctx.arc(op.x, op.y, 14, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.font = 'bold 11px Outfit';
-                ctx.textAlign = 'center';
-                ctx.fillText(`${op.name} (${op.score || 0})`, op.x, op.y - 18);
-                ctx.restore();
-            }
-        }
-    }
-
-    // 7. Oyuncu Kuşu
+    // 6. Oyuncu Kuşu
     if (gameMode === 'READY' || gameMode === 'PLAYING' || gameMode === 'GAMEOVER') {
         drawBird();
     }
