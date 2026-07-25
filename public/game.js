@@ -290,22 +290,23 @@ let lastTimestamp = performance.now();
 let selectedChar = 'senasal';
 let selectedBg = 'emin_sena';
 
-document.querySelectorAll('.char-card').forEach(card => {
-    card.addEventListener('click', (e) => {
-        const target = e.currentTarget;
+// Global Event Delegation (Tüm Tıklamaları Kesin ve Hatasız Algılar)
+document.addEventListener('click', (e) => {
+    const charCard = e.target.closest('.char-card');
+    if (charCard) {
         document.querySelectorAll('.char-card').forEach(c => c.classList.remove('selected'));
-        target.classList.add('selected');
-        selectedChar = target.getAttribute('data-char');
-    });
-});
+        charCard.classList.add('selected');
+        selectedChar = charCard.getAttribute('data-char') || 'senasal';
+        return;
+    }
 
-document.querySelectorAll('.bg-card').forEach(card => {
-    card.addEventListener('click', (e) => {
-        const target = e.currentTarget;
+    const bgCard = e.target.closest('.bg-card');
+    if (bgCard) {
         document.querySelectorAll('.bg-card').forEach(c => c.classList.remove('selected'));
-        target.classList.add('selected');
-        selectedBg = target.getAttribute('data-bg');
-    });
+        bgCard.classList.add('selected');
+        selectedBg = bgCard.getAttribute('data-bg') || 'emin_sena';
+        return;
+    }
 });
 
 playerNameInput.addEventListener('input', () => {

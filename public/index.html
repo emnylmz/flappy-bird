@@ -264,15 +264,22 @@
             align-items: center;
             justify-content: flex-start;
             padding: 24px;
-            z-index: 20;
+            z-index: 9999;
             overflow-y: auto;
+            pointer-events: auto;
             transition: opacity 0.25s ease, transform 0.25s ease;
         }
 
         .modal.hidden {
             opacity: 0;
-            pointer-events: none;
+            pointer-events: none !important;
             transform: scale(0.95);
+        }
+
+        .char-card, .bg-card, .btn, input, button {
+            pointer-events: auto !important;
+            touch-action: manipulation;
+            user-select: none;
         }
 
         h1.game-title {
