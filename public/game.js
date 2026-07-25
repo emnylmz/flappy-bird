@@ -287,7 +287,6 @@ let otherPlayers = {};
 let frameCount = 0;
 let lastTimestamp = performance.now();
 
-let selectedChar = 'senasal';
 let selectedBg = 'emin_sena';
 
 // Global Event Delegation (Tüm Tıklamaları Kesin ve Hatasız Algılar)
