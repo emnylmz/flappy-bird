@@ -430,20 +430,24 @@ function spawnPipe() {
         passed: false
     });
 
-    // %50 İhtimalle Ulaşılabilir Ama Heyecanlı Yerlerde Özel Güç Doğsun!
+    // %50 İhtimalle İKİ BORUNUN ARASINDAKİ YATAY AÇIK HAVADA Özel Güç Doğsun!
     if (Math.random() < 0.50) {
         const types = ['FREEZE', 'NITRO', 'SHIELD', 'STAR'];
         const chosenType = types[Math.floor(Math.random() * types.length)];
 
-        // Boru boşluğu (gap = 195px) içinde hem adil hem de heyecanlı ulaşılabilir yerler:
-        const fairReachablePositions = [
-            topHeight + 45,            // Üst boru kenarı yakınında (Adil & Zorlu)
-            topHeight + gap - 45,      // Alt boru kenarı yakınında (Adil & Zorlu)
-            topHeight + gap / 2        // Tam orta geçiş
+        // İki borunun arasındaki YATAY AÇIK HAVADA heyecanlı pozisyonlar:
+        // 1: Yüksek Gökyüzü (y = 80) -> Oyuncu yukarı tırmanıp alıp sonra sonraki boruya süzülmeli!
+        // 2: Düşük Zemin Yakını (y = 480) -> Oyuncu aşağı süzülüp alıp sonra tekrar yükselmeli!
+        // 3: Orta Açık Hava (y = 280) -> İki borunun ortasında açık havada
+        const openSkyPositions = [
+            80,   // Yüksek Gökyüzü Tırmanışı (Heyecanlı!)
+            480,  // Düşük Zemin Süzülmesi (Heyecanlı!)
+            280   // Orta Açık Hava
         ];
 
-        const chosenY = fairReachablePositions[Math.floor(Math.random() * fairReachablePositions.length)];
-        powerUps.push(new PowerUpItem(pipeX + 32, chosenY, chosenType));
+        const chosenY = openSkyPositions[Math.floor(Math.random() * openSkyPositions.length)];
+        // Borunun arkasındaki açık yatay mesafeye yerleştir (pipeX + 115)
+        powerUps.push(new PowerUpItem(pipeX + 115, chosenY, chosenType));
     }
 }
 
