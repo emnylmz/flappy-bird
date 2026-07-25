@@ -285,25 +285,33 @@ let particles = [];
 let floatTexts = [];
 let otherPlayers = {};
 let frameCount = 0;
-let lastTimestamp = performance.now();
-
+let ignoreJumpUntil = 0;
 let selectedBg = 'emin_sena';
 
 let lastVoiceToggleTime = 0;
 function handleVoiceToggle(e) {
     const voiceBtn = e.target.closest('.voice-btn');
     if (voiceBtn) {
+        if (e.cancelable) e.preventDefault();
+        e.stopPropagation();
         const now = Date.now();
-        if (now - lastVoiceToggleTime < 400) return;
+        if (now - lastVoiceToggleTime < 350) return;
         lastVoiceToggleTime = now;
         toggleVoiceChat();
     }
 }
 
-document.addEventListener('touchend', handleVoiceToggle);
+document.addEventListener('touchend', (e) => {
+    if (e.target.closest('.voice-btn')) {
+        handleVoiceToggle(e);
+    }
+});
 
 document.addEventListener('click', (e) => {
-    handleVoiceToggle(e);
+    if (e.target.closest('.voice-btn')) {
+        handleVoiceToggle(e);
+        return;
+    }
 
     const charCard = e.target.closest('.char-card');
     if (charCard) {
@@ -497,6 +505,7 @@ function spawnPipe() {
 
 function handleUserAction() {
     if (isFrozen) return;
+    if (Date.now() < ignoreJumpUntil) return;
 
     if (gameMode === 'READY') {
         gameMode = 'PLAYING';
@@ -517,19 +526,25 @@ function handleUserAction() {
 
 window.addEventListener('keydown', (e) => {
     if (e.code === 'Space' || e.code === 'ArrowUp') {
+        if (gameMode === 'READY' || gameMode === 'PLAYING') {
+            e.preventDefault();
+            handleUserAction();
+        }
+    }
+});
+
+canvas.addEventListener('mousedown', (e) => {
+    if (gameMode === 'READY' || gameMode === 'PLAYING') {
         e.preventDefault();
         handleUserAction();
     }
 });
 
-canvas.addEventListener('mousedown', (e) => {
-    e.preventDefault();
-    handleUserAction();
-});
-
 canvas.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    handleUserAction();
+    if (gameMode === 'READY' || gameMode === 'PLAYING') {
+        e.preventDefault();
+        handleUserAction();
+    }
 });
 
 function prepareGameReady() {
@@ -573,6 +588,7 @@ function prepareGameReady() {
     startModal.classList.add('hidden');
     gameOverModal.classList.add('hidden');
     
+    ignoreJumpUntil = Date.now() + 400;
     gameMode = 'READY';
     startHintOverlay.style.display = 'block';
     multiplayerWidget.style.display = 'flex';
@@ -617,17 +633,29 @@ function gameOver() {
     }, 450);
 }
 
-btnStartGame.addEventListener('click', () => {
+btnStartGame.addEventListener('click', (e) => {
+    if (e) {
+        if (e.cancelable) e.preventDefault();
+        e.stopPropagation();
+    }
     sounds.init();
     prepareGameReady();
 });
 
-btnRestart.addEventListener('click', () => {
+btnRestart.addEventListener('click', (e) => {
+    if (e) {
+        if (e.cancelable) e.preventDefault();
+        e.stopPropagation();
+    }
     sounds.init();
     prepareGameReady();
 });
 
-btnBackToMenu.addEventListener('click', () => {
+btnBackToMenu.addEventListener('click', (e) => {
+    if (e) {
+        if (e.cancelable) e.preventDefault();
+        e.stopPropagation();
+    }
     gameMode = 'MENU';
     gameOverModal.classList.add('hidden');
     startHintOverlay.style.display = 'none';
