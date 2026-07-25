@@ -184,19 +184,8 @@ const assets = {
 
 const processedSprites = {};
 
-assets.bgs.emin_sena.src = 'assets/bg.png?v=' + Date.now();
-assets.bgs.cyberpunk.src = 'assets/bg_cyberpunk.png';
-assets.bgs.space.src = 'assets/bg_space.png';
-assets.pipe.src = 'assets/pipe.png';
-assets.rawBirds.golden.src = 'assets/bird_golden.png';
-assets.rawBirds.cyber.src = 'assets/bird_cyber.png';
-assets.rawBirds.dragon.src = 'assets/bird_dragon.png';
-assets.rawBirds.classic.src = 'assets/bird_golden.png';
-assets.rawBirds.senasal.src = 'assets/bird_senasal.png';
-assets.rawBirds.phoenix.src = 'assets/bird_phoenix.png';
-
-function createTransparentSprite(imgKey, rawImg) {
-    rawImg.onload = () => {
+function processRawBirdImage(imgKey, rawImg) {
+    try {
         const offCanvas = document.createElement('canvas');
         const w = rawImg.naturalWidth || 200;
         const h = rawImg.naturalHeight || 200;
@@ -229,15 +218,32 @@ function createTransparentSprite(imgKey, rawImg) {
         offCtx.fill();
 
         processedSprites[imgKey] = offCanvas;
-    };
+    } catch (e) {
+        console.warn("Could not process transparent sprite for:", imgKey, e);
+    }
 }
 
-createTransparentSprite('senasal', assets.rawBirds.senasal);
-createTransparentSprite('golden', assets.rawBirds.golden);
-createTransparentSprite('cyber', assets.rawBirds.cyber);
-createTransparentSprite('dragon', assets.rawBirds.dragon);
-createTransparentSprite('classic', assets.rawBirds.classic);
-createTransparentSprite('phoenix', assets.rawBirds.phoenix);
+function loadAndProcessBird(imgKey, srcPath) {
+    const img = new Image();
+    img.onload = () => processRawBirdImage(imgKey, img);
+    img.src = srcPath;
+    if (img.complete && img.naturalWidth > 0) {
+        processRawBirdImage(imgKey, img);
+    }
+    assets.rawBirds[imgKey] = img;
+}
+
+loadAndProcessBird('senasal', 'assets/bird_senasal.png');
+loadAndProcessBird('golden', 'assets/bird_golden.png');
+loadAndProcessBird('cyber', 'assets/bird_cyber.png');
+loadAndProcessBird('dragon', 'assets/bird_dragon.png');
+loadAndProcessBird('classic', 'assets/bird_golden.png');
+loadAndProcessBird('phoenix', 'assets/bird_phoenix.png');
+
+assets.bgs.emin_sena.src = 'assets/bg.png';
+assets.bgs.cyberpunk.src = 'assets/bg_cyberpunk.png';
+assets.bgs.space.src = 'assets/bg_space.png';
+assets.pipe.src = 'assets/pipe.png';
 
 const CHAR_INFO = {
     senasal: { name: "Senasal Fena", icon: "🎀", color: "#ff69b4" },
@@ -1130,11 +1136,19 @@ function render() {
     ctx.clearRect(0, 0, 480, 640);
 
     // 1. Seçilen Arkaplan Teması
+    let bgDrawn = false;
     const currentBgImg = assets.bgs[selectedBg] || assets.bgs.emin_sena;
     if (currentBgImg && currentBgImg.complete && currentBgImg.naturalWidth > 0) {
-        ctx.drawImage(currentBgImg, bgX, 0, 480, 640);
-        ctx.drawImage(currentBgImg, bgX + 480, 0, 480, 640);
-    } else {
+        try {
+            ctx.drawImage(currentBgImg, bgX, 0, 480, 640);
+            ctx.drawImage(currentBgImg, bgX + 480, 0, 480, 640);
+            bgDrawn = true;
+        } catch (e) {
+            bgDrawn = false;
+        }
+    }
+
+    if (!bgDrawn) {
         const skyGradient = ctx.createLinearGradient(0, 0, 0, 640);
         skyGradient.addColorStop(0, '#1e3c72');
         skyGradient.addColorStop(0.5, '#2a5298');
