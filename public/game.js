@@ -289,8 +289,16 @@ let lastTimestamp = performance.now();
 
 let selectedBg = 'emin_sena';
 
-// Global Event Delegation (Tüm Tıklamaları Kesin ve Hatasız Algılar)
+// Global Event Delegation (Tüm Tıklamaları ve Dokunmaları Kesin Algılar)
 document.addEventListener('click', (e) => {
+    const voiceBtn = e.target.closest('.voice-btn');
+    if (voiceBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleVoiceChat();
+        return;
+    }
+
     const charCard = e.target.closest('.char-card');
     if (charCard) {
         document.querySelectorAll('.char-card').forEach(c => c.classList.remove('selected'));
@@ -307,6 +315,13 @@ document.addEventListener('click', (e) => {
         return;
     }
 });
+
+document.addEventListener('touchstart', (e) => {
+    const voiceBtn = e.target.closest('.voice-btn');
+    if (voiceBtn) {
+        e.stopPropagation();
+    }
+}, { passive: true });
 
 playerNameInput.addEventListener('input', () => {
     if (playerNameInput.value.trim() !== '') {
@@ -671,13 +686,28 @@ const rtcConfig = {
     iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
 };
 
+function updateVoiceButtons(active) {
+    document.querySelectorAll('.voice-btn').forEach(btn => {
+        if (active) {
+            btn.classList.add('active');
+            btn.innerText = '🎙️ AÇIK';
+        } else {
+            btn.classList.remove('active');
+            btn.innerText = '🎙️ KAPALI';
+        }
+    });
+}
+
 async function toggleVoiceChat() {
     if (!isVoiceActive) {
         try {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert("Tarayıcınız sesli sohbet özelliğini desteklemiyor.");
+                return;
+            }
             localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
             isVoiceActive = true;
-            btnVoiceToggle.classList.add('active');
-            btnVoiceToggle.innerText = '🎙️ AÇIK';
+            updateVoiceButtons(true);
             spawnFloatText("🎙️ MİKROFON AÇILDI!", bird.x, bird.y - 20);
 
             for (let peerId in otherPlayers) {
@@ -687,7 +717,10 @@ async function toggleVoiceChat() {
             }
         } catch (err) {
             console.error("Mikrofon erişimi engellendi:", err);
+            isVoiceActive = false;
+            updateVoiceButtons(false);
             spawnFloatText("⚠️ MİKROFON İZNİ GEREKLİ", bird.x, bird.y - 20);
+            alert("Mikrofon izni alınamadı! Lütfen tarayıcınızın adres çubuğundaki kilit ikonuna tıklayarak mikrofon izni verin.");
         }
     } else {
         stopVoiceChat();
@@ -701,13 +734,13 @@ function stopVoiceChat() {
         localStream = null;
     }
     for (let id in peerConnections) {
-        peerConnections[id].close();
+        if (peerConnections[id]) {
+            peerConnections[id].close();
+        }
     }
     peerConnections = {};
-    if (btnVoiceToggle) {
-        btnVoiceToggle.classList.remove('active');
-        btnVoiceToggle.innerText = '🎙️ KAPALI';
-    }
+    updateVoiceButtons(false);
+    spawnFloatText("🔇 MİKROFON KAPATILDI", bird.x, bird.y - 20);
 }
 
 function createPeerConnection(peerId, isInitiator) {
