@@ -184,8 +184,7 @@ const assets = {
 
 const processedSprites = {};
 
-assets.bgs.emin_sena.src = 'assets/bg.png';
-assets.bgs.sky.src = 'assets/bg.png';
+assets.bgs.emin_sena.src = 'assets/bg.png?v=' + Date.now();
 assets.bgs.cyberpunk.src = 'assets/bg_cyberpunk.png';
 assets.bgs.space.src = 'assets/bg_space.png';
 assets.pipe.src = 'assets/pipe.png';
@@ -1131,14 +1130,15 @@ function render() {
     ctx.clearRect(0, 0, 480, 640);
 
     // 1. Seçilen Arkaplan Teması
-    const currentBgImg = assets.bgs[selectedBg] || assets.bgs.emin_sena || assets.bgs.sky;
-    if (currentBgImg.complete && currentBgImg.naturalWidth > 0) {
+    const currentBgImg = assets.bgs[selectedBg] || assets.bgs.emin_sena;
+    if (currentBgImg && currentBgImg.complete && currentBgImg.naturalWidth > 0) {
         ctx.drawImage(currentBgImg, bgX, 0, 480, 640);
         ctx.drawImage(currentBgImg, bgX + 480, 0, 480, 640);
     } else {
         const skyGradient = ctx.createLinearGradient(0, 0, 0, 640);
-        skyGradient.addColorStop(0, '#70c5ce');
-        skyGradient.addColorStop(1, '#2c3e50');
+        skyGradient.addColorStop(0, '#1e3c72');
+        skyGradient.addColorStop(0.5, '#2a5298');
+        skyGradient.addColorStop(1, '#0f172a');
         ctx.fillStyle = skyGradient;
         ctx.fillRect(0, 0, 480, 640);
     }
