@@ -1133,62 +1133,69 @@ function update(dt) {
 
 // --- ÇİZİM DÖNGÜSÜ ---
 function render() {
-    ctx.clearRect(0, 0, 480, 640);
+    // 0. Temel Güvenlik Arkaplanı (Tuval asla simsiyah kalamaz!)
+    const skyGradient = ctx.createLinearGradient(0, 0, 0, 640);
+    skyGradient.addColorStop(0, '#1e3c72');
+    skyGradient.addColorStop(0.5, '#2a5298');
+    skyGradient.addColorStop(1, '#0f172a');
+    ctx.fillStyle = skyGradient;
+    ctx.fillRect(0, 0, 480, 640);
 
-    // 1. Seçilen Arkaplan Teması
-    let bgDrawn = false;
-    const currentBgImg = assets.bgs[selectedBg] || assets.bgs.emin_sena;
-    if (currentBgImg && currentBgImg.complete && currentBgImg.naturalWidth > 0) {
-        try {
+    // 1. Seçilen Resimli Arkaplan Teması
+    try {
+        const currentBgImg = assets.bgs[selectedBg] || assets.bgs.emin_sena;
+        if (currentBgImg && currentBgImg.complete && currentBgImg.naturalWidth > 0) {
             ctx.drawImage(currentBgImg, bgX, 0, 480, 640);
             ctx.drawImage(currentBgImg, bgX + 480, 0, 480, 640);
-            bgDrawn = true;
-        } catch (e) {
-            bgDrawn = false;
         }
-    }
-
-    if (!bgDrawn) {
-        const skyGradient = ctx.createLinearGradient(0, 0, 0, 640);
-        skyGradient.addColorStop(0, '#1e3c72');
-        skyGradient.addColorStop(0.5, '#2a5298');
-        skyGradient.addColorStop(1, '#0f172a');
-        ctx.fillStyle = skyGradient;
-        ctx.fillRect(0, 0, 480, 640);
-    }
+    } catch (e) {}
 
     // 2. Borular
-    pipes.forEach(pipe => drawPipe(pipe));
+    try {
+        pipes.forEach(pipe => drawPipe(pipe));
+    } catch (e) {}
 
     // 3. Belirgin İkonlu Özel Güçler
-    powerUps.forEach(pu => pu.draw(ctx));
+    try {
+        powerUps.forEach(pu => pu.draw(ctx));
+    } catch (e) {}
 
     // 4. Zemin
-    const groundY = 640 - groundHeight;
-    ctx.fillStyle = '#2ed573';
-    ctx.fillRect(0, groundY, 480, groundHeight);
-    ctx.fillStyle = '#26af5f';
-    ctx.fillRect(0, groundY, 480, 8);
-    ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0, groundY + 8, 480, groundHeight - 8);
+    try {
+        const groundY = 640 - groundHeight;
+        ctx.fillStyle = '#2ed573';
+        ctx.fillRect(0, groundY, 480, groundHeight);
+        ctx.fillStyle = '#26af5f';
+        ctx.fillRect(0, groundY, 480, 8);
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(0, groundY + 8, 480, groundHeight - 8);
+    } catch (e) {}
 
     // 5. Hafif Parçacıklar
-    particles.forEach(p => p.draw(ctx));
+    try {
+        particles.forEach(p => p.draw(ctx));
+    } catch (e) {}
 
     // 6. Oyuncu Kuşu
-    if (gameMode === 'READY' || gameMode === 'PLAYING' || gameMode === 'GAMEOVER') {
-        drawBird();
-    }
+    try {
+        if (gameMode === 'READY' || gameMode === 'PLAYING' || gameMode === 'GAMEOVER') {
+            drawBird();
+        }
+    } catch (e) {}
 
     // 8. Yüzen Metinler
-    floatTexts.forEach(ft => {
-        ctx.save();
-        ctx.globalAlpha = Math.max(0, ft.alpha);
-        ctx.font = 'bold 18px "Press Start 2P", sans-serif';
-        ctx.fillStyle = '#ffd700';
-        ctx.fillText(ft.text, ft.x, ft.y);
-        ctx.restore();
-    });
+    try {
+        floatTexts.forEach(ft => {
+            if (ft && typeof ft.alpha === 'number') {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, Math.min(1, ft.alpha));
+                ctx.font = 'bold 16px "Outfit", sans-serif';
+                ctx.fillStyle = '#ffd700';
+                ctx.fillText(ft.text || '', ft.x || 0, ft.y || 0);
+                ctx.restore();
+            }
+        });
+    } catch (e) {}
 }
 
 function drawPipe(pipe) {
@@ -1274,14 +1281,20 @@ function drawBird() {
     ctx.restore();
 }
 
-// Ana Oyun Döngüsü (Delta Time ile Yağ Gibi Akıcı 60 FPS)
+// Ana Oyun Döngüsü (Kilitlenmez 60 FPS Yağ Gibi Akıcı Engine)
 function gameLoop(timestamp) {
-    const dt = Math.min((timestamp - lastTimestamp) / 16.667, 2.0) || 1.0;
-    lastTimestamp = timestamp;
-
-    update(dt);
-    render();
     requestAnimationFrame(gameLoop);
+
+    try {
+        if (!lastTimestamp) lastTimestamp = timestamp;
+        const dt = Math.min(Math.max((timestamp - lastTimestamp) / 16.667, 0.1), 2.0) || 1.0;
+        lastTimestamp = timestamp;
+
+        update(dt);
+        render();
+    } catch (err) {
+        console.error("Game loop error:", err);
+    }
 }
 
 requestAnimationFrame(gameLoop);
