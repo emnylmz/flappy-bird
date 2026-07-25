@@ -689,10 +689,18 @@ function updateVoiceButtons(active) {
     document.querySelectorAll('.voice-btn').forEach(btn => {
         if (active) {
             btn.classList.add('active');
-            btn.innerText = '🎙️ AÇIK';
+            if (btn.classList.contains('voice-btn-large')) {
+                btn.innerText = '🎙️ CANLI SESLİ SOHBET (AÇIK)';
+            } else {
+                btn.innerText = '🎙️ SES: AÇIK';
+            }
         } else {
             btn.classList.remove('active');
-            btn.innerText = '🎙️ KAPALI';
+            if (btn.classList.contains('voice-btn-large')) {
+                btn.innerText = '🎙️ CANLI SESLİ SOHBETİ AÇ (KAPALI)';
+            } else {
+                btn.innerText = '🎙️ SES: KAPALI';
+            }
         }
     });
 }
