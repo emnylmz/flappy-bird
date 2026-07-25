@@ -166,6 +166,7 @@ const sounds = new SoundEngine();
 const assets = {
     bg: new Image(),
     bgs: {
+        emin_sena: new Image(),
         sky: new Image(),
         cyberpunk: new Image(),
         space: new Image()
@@ -183,6 +184,7 @@ const assets = {
 
 const processedSprites = {};
 
+assets.bgs.emin_sena.src = 'assets/bg.png';
 assets.bgs.sky.src = 'assets/bg.png';
 assets.bgs.cyberpunk.src = 'assets/bg_cyberpunk.png';
 assets.bgs.space.src = 'assets/bg_space.png';
@@ -285,22 +287,24 @@ let otherPlayers = {};
 let frameCount = 0;
 let lastTimestamp = performance.now();
 
-let selectedChar = 'golden';
-let selectedBg = 'sky';
+let selectedChar = 'senasal';
+let selectedBg = 'emin_sena';
 
 document.querySelectorAll('.char-card').forEach(card => {
-    card.addEventListener('click', () => {
+    card.addEventListener('click', (e) => {
+        const target = e.currentTarget;
         document.querySelectorAll('.char-card').forEach(c => c.classList.remove('selected'));
-        card.classList.add('selected');
-        selectedChar = card.getAttribute('data-char');
+        target.classList.add('selected');
+        selectedChar = target.getAttribute('data-char');
     });
 });
 
 document.querySelectorAll('.bg-card').forEach(card => {
-    card.addEventListener('click', () => {
+    card.addEventListener('click', (e) => {
+        const target = e.currentTarget;
         document.querySelectorAll('.bg-card').forEach(c => c.classList.remove('selected'));
-        card.classList.add('selected');
-        selectedBg = card.getAttribute('data-bg');
+        target.classList.add('selected');
+        selectedBg = target.getAttribute('data-bg');
     });
 });
 
@@ -1057,7 +1061,7 @@ function render() {
     ctx.clearRect(0, 0, 480, 640);
 
     // 1. Seçilen Arkaplan Teması
-    const currentBgImg = assets.bgs[selectedBg] || assets.bgs.sky;
+    const currentBgImg = assets.bgs[selectedBg] || assets.bgs.emin_sena || assets.bgs.sky;
     if (currentBgImg.complete && currentBgImg.naturalWidth > 0) {
         ctx.drawImage(currentBgImg, bgX, 0, 480, 640);
         ctx.drawImage(currentBgImg, bgX + 480, 0, 480, 640);
