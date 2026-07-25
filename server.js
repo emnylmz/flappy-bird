@@ -9,9 +9,8 @@ app.use(express.json());
 app.use(express.static('public'));
 
 const SCORES_FILE = path.join(__dirname, 'scores.json');
-const ADMIN_KEY = "admin123"; // Varsayılan Admin Şifresi
+const ADMIN_KEY = "admin123";
 
-// Liderlik Tablosunu Yükle
 function loadScores() {
     try {
         if (fs.existsSync(SCORES_FILE)) {
@@ -25,7 +24,6 @@ function loadScores() {
     return [];
 }
 
-// Skorları Kaydet
 function saveScores(scores) {
     try {
         fs.writeFileSync(SCORES_FILE, JSON.stringify(scores, null, 2), 'utf8');
@@ -37,12 +35,10 @@ function saveScores(scores) {
 let leaderboard = loadScores();
 const activePlayers = {};
 
-// Admin Rotaları
 app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
-// Admin API
 app.post('/api/admin/action', (req, res) => {
     const { adminKey, action, payload } = req.body;
 
@@ -93,7 +89,8 @@ io.on('connection', (socket) => {
             x: 100,
             y: 300,
             score: 0,
-            isAlive: true
+            isAlive: true,
+            isMuted: true
         };
         io.emit('playersUpdate', activePlayers);
     });
@@ -112,6 +109,26 @@ io.on('connection', (socket) => {
         const attackerName = activePlayers[socket.id] ? activePlayers[socket.id].name : 'Bir Oyuncu';
         socket.broadcast.emit('getFrozen', { attackerName });
         io.emit('systemAnnounce', `❄️ ${attackerName} HERKESİ DONDURDU!`);
+    });
+
+    // WebRTC Sesli Sohbet Sinyalleşmesi
+    socket.on('voiceSignal', (data) => {
+        if (data && data.targetId) {
+            io.to(data.targetId).emit('voiceSignal', {
+                callerId: socket.id,
+                signal: data.signal
+            });
+        }
+    });
+
+    socket.on('voiceStatus', (status) => {
+        if (activePlayers[socket.id]) {
+            activePlayers[socket.id].isMuted = status.isMuted;
+            socket.broadcast.emit('voiceStatusUpdate', {
+                id: socket.id,
+                isMuted: status.isMuted
+            });
+        }
     });
 
     socket.on('submitScore', (data) => {

@@ -631,6 +631,129 @@ if (socket) {
     });
 }
 
+// --- CANLI SESLİ SOHBET (WEBRTC VOICE CHAT) ---
+const btnVoiceToggle = document.getElementById('btnVoiceToggle');
+let localStream = null;
+let peerConnections = {};
+let isVoiceActive = false;
+
+const rtcConfig = {
+    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+};
+
+async function toggleVoiceChat() {
+    if (!isVoiceActive) {
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+            isVoiceActive = true;
+            btnVoiceToggle.classList.add('active');
+            btnVoiceToggle.innerText = '🎙️ AÇIK';
+            spawnFloatText("🎙️ MİKROFON AÇILDI!", bird.x, bird.y - 20);
+
+            for (let peerId in otherPlayers) {
+                if (peerId !== socket.id) {
+                    createPeerConnection(peerId, true);
+                }
+            }
+        } catch (err) {
+            console.error("Mikrofon erişimi engellendi:", err);
+            spawnFloatText("⚠️ MİKROFON İZNİ GEREKLİ", bird.x, bird.y - 20);
+        }
+    } else {
+        stopVoiceChat();
+    }
+}
+
+function stopVoiceChat() {
+    isVoiceActive = false;
+    if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+        localStream = null;
+    }
+    for (let id in peerConnections) {
+        peerConnections[id].close();
+    }
+    peerConnections = {};
+    if (btnVoiceToggle) {
+        btnVoiceToggle.classList.remove('active');
+        btnVoiceToggle.innerText = '🎙️ KAPALI';
+    }
+}
+
+function createPeerConnection(peerId, isInitiator) {
+    if (peerConnections[peerId]) return peerConnections[peerId];
+
+    const pc = new RTCPeerConnection(rtcConfig);
+    peerConnections[peerId] = pc;
+
+    if (localStream) {
+        localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+    }
+
+    pc.onicecandidate = (event) => {
+        if (event.candidate && socket) {
+            socket.emit('voiceSignal', {
+                targetId: peerId,
+                signal: { type: 'candidate', candidate: event.candidate }
+            });
+        }
+    };
+
+    pc.ontrack = (event) => {
+        let remoteAudio = document.getElementById(`audio_${peerId}`);
+        if (!remoteAudio) {
+            remoteAudio = document.createElement('audio');
+            remoteAudio.id = `audio_${peerId}`;
+            remoteAudio.autoplay = true;
+            document.body.appendChild(remoteAudio);
+        }
+        remoteAudio.srcObject = event.streams[0];
+    };
+
+    if (isInitiator) {
+        pc.createOffer().then(offer => {
+            pc.setLocalDescription(offer);
+            socket.emit('voiceSignal', {
+                targetId: peerId,
+                signal: { type: 'offer', offer: offer }
+            });
+        });
+    }
+
+    return pc;
+}
+
+if (btnVoiceToggle) {
+    btnVoiceToggle.addEventListener('click', () => {
+        toggleVoiceChat();
+    });
+}
+
+if (socket) {
+    socket.on('voiceSignal', async (data) => {
+        const { callerId, signal } = data;
+        let pc = peerConnections[callerId];
+
+        if (!pc) {
+            pc = createPeerConnection(callerId, false);
+        }
+
+        if (signal.type === 'offer') {
+            await pc.setRemoteDescription(new RTCSessionDescription(signal.offer));
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+            socket.emit('voiceSignal', {
+                targetId: callerId,
+                signal: { type: 'answer', answer: answer }
+            });
+        } else if (signal.type === 'answer') {
+            await pc.setRemoteDescription(new RTCSessionDescription(signal.answer));
+        } else if (signal.type === 'candidate' && signal.candidate) {
+            await pc.addIceCandidate(new RTCIceCandidate(signal.candidate));
+        }
+    });
+}
+
 function updatePowerupHud() {
     if (!powerupHud) return;
     powerupHud.innerHTML = '';
