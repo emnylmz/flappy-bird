@@ -531,16 +531,21 @@ window.addEventListener('keydown', (e) => {
     }
 });
 
-canvas.addEventListener('mousedown', (e) => {
+window.addEventListener('touchstart', (e) => {
+    if (e.target.closest('.modal') || e.target.closest('.btn') || e.target.closest('.voice-btn') || e.target.closest('input')) {
+        return;
+    }
     if (gameMode === 'READY' || gameMode === 'PLAYING') {
-        e.preventDefault();
+        if (e.cancelable) e.preventDefault();
         handleUserAction();
     }
-});
+}, { passive: false });
 
-canvas.addEventListener('touchstart', (e) => {
+window.addEventListener('mousedown', (e) => {
+    if (e.target.closest('.modal') || e.target.closest('.btn') || e.target.closest('.voice-btn') || e.target.closest('input')) {
+        return;
+    }
     if (gameMode === 'READY' || gameMode === 'PLAYING') {
-        e.preventDefault();
         handleUserAction();
     }
 });
@@ -692,7 +697,7 @@ if (socket) {
     socket.on('getFrozen', (data) => {
         if (gameMode === 'PLAYING') {
             isFrozen = true;
-            freezeTimer = 180;
+            freezeTimer = 120;
             frostOverlay.style.display = 'flex';
             sounds.playFreeze();
         }
@@ -1020,9 +1025,10 @@ function update(dt) {
 
         if (isFrozen) {
             freezeTimer -= dt;
-            currentPipeSpeed = 0; // Borular TAMAMEN DURUR!
-            bird.velocity = 0;    // Kuş havada DOKUNULMAZ ve HAREKETSİZ kilitlenir!
-            bird.rotation = 0;
+            currentPipeSpeed = basePipeSpeed * 0.7;
+            bird.velocity += bird.gravity * dt;
+            bird.y += bird.velocity * dt;
+            bird.rotation = Math.min(Math.PI / 4, Math.max(-Math.PI / 6, bird.velocity * 0.07));
 
             if (freezeTimer <= 0) {
                 isFrozen = false;
