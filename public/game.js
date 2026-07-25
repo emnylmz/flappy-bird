@@ -4,11 +4,8 @@ const ctx = canvas.getContext('2d');
 
 const socket = typeof io !== 'undefined' ? io() : null;
 
-// Mobil Çözünürlük & Performans Ayarı (DPI Clamp)
-const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-canvas.width = Math.floor(480 * dpr);
-canvas.height = Math.floor(640 * dpr);
-ctx.scale(dpr, dpr);
+canvas.width = 480;
+canvas.height = 640;
 
 // UI Elementleri
 const startModal = document.getElementById('startModal');
@@ -240,7 +237,7 @@ loadAndProcessBird('dragon', 'assets/bird_dragon.png');
 loadAndProcessBird('classic', 'assets/bird_golden.png');
 loadAndProcessBird('phoenix', 'assets/bird_phoenix.png');
 
-assets.bgs.emin_sena.src = 'assets/bg.png';
+assets.bgs.emin_sena.src = 'assets/bg.jpg';
 assets.bgs.cyberpunk.src = 'assets/bg_cyberpunk.png';
 assets.bgs.space.src = 'assets/bg_space.png';
 assets.pipe.src = 'assets/pipe.png';
