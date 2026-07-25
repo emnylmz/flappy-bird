@@ -430,22 +430,19 @@ function spawnPipe() {
         passed: false
     });
 
-    // %50 İhtimalle Zorlu / Riskli Yerlerde Özel Güç Doğsun!
+    // %50 İhtimalle Ulaşılabilir Ama Heyecanlı Yerlerde Özel Güç Doğsun!
     if (Math.random() < 0.50) {
         const types = ['FREEZE', 'NITRO', 'SHIELD', 'STAR'];
         const chosenType = types[Math.floor(Math.random() * types.length)];
 
-        // Alması Zor, Riskli Pozisyon Seçimleri:
-        // 1: Üst boru kenarına çok yakın (Tehlikeli Tavan)
-        // 2: Alt boru kenarına çok yakın (Tehlikeli Zemin)
-        // 3: Borunun hemen üst uç noktası
-        const riskPositions = [
-            topHeight + 30,             // Üst boru kenarına sıfır (Riskli!)
-            topHeight + gap - 30,       // Alt boru kenarına sıfır (Riskli!)
-            Math.max(45, topHeight - 35) // Üst borunun tepesi (Dar geçiş!)
+        // Boru boşluğu (gap = 195px) içinde hem adil hem de heyecanlı ulaşılabilir yerler:
+        const fairReachablePositions = [
+            topHeight + 45,            // Üst boru kenarı yakınında (Adil & Zorlu)
+            topHeight + gap - 45,      // Alt boru kenarı yakınında (Adil & Zorlu)
+            topHeight + gap / 2        // Tam orta geçiş
         ];
 
-        const chosenY = riskPositions[Math.floor(Math.random() * riskPositions.length)];
+        const chosenY = fairReachablePositions[Math.floor(Math.random() * fairReachablePositions.length)];
         powerUps.push(new PowerUpItem(pipeX + 32, chosenY, chosenType));
     }
 }
@@ -737,10 +734,10 @@ function checkCollision() {
     if (bird.y - bird.radius <= 0 || bird.y + bird.radius >= 640 - groundHeight) {
         if (hasShield) {
             hasShield = false;
-            shieldInvincibleTimer = 90; // 1.5 Saniye Geçici Koruma!
+            shieldInvincibleTimer = 180; // 3 TAM SANYİE GEÇİCİ YENİLMEZLİK KORUMASI!
             sounds.playShield();
             bird.velocity = -3.5;
-            spawnFloatText("🛡️ KALKAN KORUDU!", bird.x, bird.y - 20);
+            spawnFloatText("🛡️ KALKAN KORUDU! (3s KORUMA)", bird.x, bird.y - 20);
             updatePowerupHud();
             return false;
         }
@@ -752,10 +749,10 @@ function checkCollision() {
             if (bird.y - bird.radius < pipe.topHeight || bird.y + bird.radius > pipe.bottomY) {
                 if (hasShield) {
                     hasShield = false;
-                    shieldInvincibleTimer = 90; // 1.5 Saniye Geçici Koruma!
+                    shieldInvincibleTimer = 180; // 3 TAM SANYİE GEÇİCİ YENİLMEZLİK KORUMASI!
                     sounds.playShield();
                     bird.velocity = -3.5;
-                    spawnFloatText("🛡️ KALKAN KORUDU!", bird.x, bird.y - 20);
+                    spawnFloatText("🛡️ KALKAN KORUDU! (3s KORUMA)", bird.x, bird.y - 20);
                     updatePowerupHud();
                     return false;
                 }
