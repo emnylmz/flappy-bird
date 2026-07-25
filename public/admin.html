@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Bird Pro - Admin Kontrol Paneli</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ffd700;
+            --cyber-cyan: #00f3ff;
+            --bg-dark: #090d16;
+            --card-bg: rgba(15, 23, 42, 0.85);
+            --border: rgba(255, 255, 255, 0.12);
+            --danger: #ff4757;
+            --success: #2ed573;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: radial-gradient(circle at center, #1e293b 0%, #090d16 100%);
+            color: #ffffff;
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .admin-container {
+            width: 100%;
+            max-width: 680px;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 243, 255, 0.15);
+        }
+
+        .admin-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .admin-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 18px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Login Modal Overlay */
+        #loginOverlay {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 0;
+        }
+
+        .input-group {
+            width: 100%;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: #cbd5e1;
+            margin-bottom: 6px;
+        }
+
+        .input-group input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ffd700, #ff9100);
+            color: #000;
+            width: 100%;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff4757, #ff6b81);
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 0 15px rgba(255, 71, 87, 0.5);
+            transform: translateY(-1px);
+        }
+
+        /* Action Cards Grid */
+        .dashboard {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .action-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+        }
+
+        .card-title {
+            font-weight: 800;
+            font-size: 15px;
+            color: var(--cyber-cyan);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+        }
+
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 13px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        th {
+            color: #94a3b8;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 11px;
+        }
+
+        .btn-sm {
+            padding: 4px 10px;
+            font-size: 11px;
+            border-radius: 8px;
+        }
+
+        /* Toast Alert */
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--success);
+            color: #000;
+            font-weight: 800;
+            padding: 12px 20px;
+            border-radius: 12px;
+            display: none;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-container">
+        <div class="admin-header">
+            <div class="admin-title">⚙️ ADMIN PANALİ</div>
+            <a href="/" style="color:#94a3b8; text-decoration:none; font-size:13px;">🎮 Oyuna Dön</a>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <div id="loginOverlay">
+            <div class="input-group">
+                <label for="adminKeyInput">Admin Şifresi</label>
+                <input type="password" id="adminKeyInput" placeholder="Şifrenizi girin... (Varsayılan: admin123)">
+            </div>
+            <button id="btnLogin" class="btn btn-primary">GİRİŞ YAP</button>
+            <div id="loginError" style="color:var(--danger); font-size:13px; display:none;">Hatalı admin şifresi!</div>
+        </div>
+
+        <!-- DASHBOARD PANEL -->
+        <div id="dashboardPanel" class="dashboard">
+
+            <!-- 1. Liderlik Tablosu Yönetimi -->
+            <div class="action-card">
+                <div class="card-title">
+                    <span>🏆 LİDERLİK TABLOSU YÖNETİMİ</span>
+                    <button id="btnResetAll" class="btn btn-danger btn-sm">🗑️ TÜM TABLOYU SIFIRLA</button>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sıra</th>
+                            <th>Oyuncu Adı</th>
+                            <th>Skor</th>
+                            <th>Tarih</th>
+                            <th>İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardTableBody">
+                        <tr><td colspan="5" style="text-align:center; color:#94a3b8;">Yükleniyor...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 2. Canlı Duyuru Gönder -->
+            <div class="action-card">
+                <div class="card-title">📢 CANLI SUNUCU DUYURUSU GÖNDER</div>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="announceInput" placeholder="Tüm oyundakilere duyuru mesajı yazın..." style="flex:1; background:rgba(255,255,255,0.08); border:1px solid var(--border); border-radius:10px; padding:10px 14px; color:#fff; outline:none;">
+                    <button id="btnSendAnnounce" class="btn btn-primary" style="width:auto; padding:10px 20px;">GÖNDER</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="toast">İşlem Başarılı!</div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let savedAdminKey = '';
+
+        const loginOverlay = document.getElementById('loginOverlay');
+        const dashboardPanel = document.getElementById('dashboardPanel');
+        const adminKeyInput = document.getElementById('adminKeyInput');
+        const btnLogin = document.getElementById('btnLogin');
+        const loginError = document.getElementById('loginError');
+        const leaderboardTableBody = document.getElementById('leaderboardTableBody');
+        const btnResetAll = document.getElementById('btnResetAll');
+        const announceInput = document.getElementById('announceInput');
+        const btnSendAnnounce = document.getElementById('btnSendAnnounce');
+        const toast = document.getElementById('toast');
+
+        function showToast(msg, isError = false) {
+            toast.innerText = msg;
+            toast.style.background = isError ? '#ff4757' : '#2ed573';
+            toast.style.color = isError ? '#fff' : '#000';
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        }
+
+        async function sendAdminAction(action, payload = {}) {
+            try {
+                const res = await fetch('/api/admin/action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ adminKey: savedAdminKey, action, payload })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message);
+                    return true;
+                } else {
+                    showToast(data.message, true);
+                    return false;
+                }
+            } catch (err) {
+                showToast("Sunucu hatası oluştu!", true);
+                return false;
+            }
+        }
+
+        btnLogin.addEventListener('click', async () => {
+            savedAdminKey = adminKeyInput.value.trim();
+            const success = await sendAdminAction('getStats'); // Test key
+            if (success || savedAdminKey === 'admin123') {
+                loginOverlay.style.display = 'none';
+                dashboardPanel.style.display = 'flex';
+                loginError.style.display = 'none';
+            } else {
+                loginError.style.display = 'block';
+            }
+        });
+
+        // Tabloyu Sıfırla
+        btnResetAll.addEventListener('click', async () => {
+            if (confirm("🚨 DİKKAT: Tüm Liderlik Tablosu silinecektir! Emin misiniz?")) {
+                await sendAdminAction('resetLeaderboard');
+            }
+        });
+
+        // Canlı Duyuru Gönder
+        btnSendAnnounce.addEventListener('click', async () => {
+            const msg = announceInput.value.trim();
+            if (!msg) return;
+            const success = await sendAdminAction('broadcast', { message: msg });
+            if (success) announceInput.value = '';
+        });
+
+        // Socket üzerinden Canlı Liderlik Güncellemesi
+        socket.on('leaderboardUpdate', (leaderboard) => {
+            renderTable(leaderboard);
+        });
+
+        function renderTable(leaderboard) {
+            leaderboardTableBody.innerHTML = '';
+            if (!leaderboard || leaderboard.length === 0) {
+                leaderboardTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8;">Tablo şu anda boş.</td></tr>';
+                return;
+            }
+
+            leaderboard.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>#${index + 1}</strong></td>
+                    <td>${escapeHtml(item.name)}</td>
+                    <td style="color:var(--primary); font-weight:800;">${item.score}</td>
+                    <td style="color:#94a3b8;">${item.date || '-'}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" onclick="deleteEntry(${index})">Sil</button>
+                    </td>
+                `;
+                leaderboardTableBody.appendChild(tr);
+            });
+        }
+
+        window.deleteEntry = async function(index) {
+            if (confirm("Bu skor kaydını silmek istediğinize emin misiniz?")) {
+                await sendAdminAction('deleteScore', { index });
+            }
+        };
+
+        function escapeHtml(str) {
+            return str.replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[m]);
+        }
+    </script>
+</body>
+</html>
