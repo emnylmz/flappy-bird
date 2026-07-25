@@ -486,23 +486,17 @@ function spawnPipe() {
         passed: false
     });
 
-    // %50 İhtimalle İKİ BORUNUN ARASINDAKİ YATAY AÇIK HAVADA Özel Güç Doğsun!
-    if (Math.random() < 0.50) {
-        const types = ['FREEZE', 'NITRO', 'SHIELD', 'STAR'];
-        const chosenType = types[Math.floor(Math.random() * types.length)];
+    // %40 İhtimalle İKİ BORUNUN ARASINDAKİ YATAY AÇIK HAVADA Özel Güç Doğsun!
+    if (Math.random() < 0.40) {
+        const rand = Math.random();
+        let chosenType = 'STAR';
+        if (rand < 0.40) chosenType = 'STAR';       // %40 Yıldız (+3 Skor)
+        else if (rand < 0.70) chosenType = 'NITRO';  // %30 Nitro Roket (+6 Skor & Hız)
+        else if (rand < 0.88) chosenType = 'SHIELD'; // %18 Kalkan
+        else chosenType = 'FREEZE';                  // %12 Dondurma Saldırısı
 
-        // İki borunun arasındaki YATAY AÇIK HAVADA heyecanlı pozisyonlar:
-        // 1: Yüksek Gökyüzü (y = 80) -> Oyuncu yukarı tırmanıp alıp sonra sonraki boruya süzülmeli!
-        // 2: Düşük Zemin Yakını (y = 480) -> Oyuncu aşağı süzülüp alıp sonra tekrar yükselmeli!
-        // 3: Orta Açık Hava (y = 280) -> İki borunun ortasında açık havada
-        const openSkyPositions = [
-            80,   // Yüksek Gökyüzü Tırmanışı (Heyecanlı!)
-            480,  // Düşük Zemin Süzülmesi (Heyecanlı!)
-            280   // Orta Açık Hava
-        ];
-
+        const openSkyPositions = [80, 480, 280];
         const chosenY = openSkyPositions[Math.floor(Math.random() * openSkyPositions.length)];
-        // Borunun arkasındaki açık yatay mesafeye yerleştir (pipeX + 115)
         powerUps.push(new PowerUpItem(pipeX + 115, chosenY, chosenType));
     }
 }
@@ -676,18 +670,20 @@ if (socket) {
     });
 
     socket.on('playersUpdate', (players) => {
+        const myId = socket ? socket.id : null;
         const newOther = {};
         for (let id in players) {
-            if (id !== socket.id) {
-                newOther[id] = players[id];
-            }
+            if (myId && id === myId) continue;
+            newOther[id] = players[id];
         }
         otherPlayers = newOther;
         renderMultiplayerWidget();
     });
 
     socket.on('playerMoved', (playerData) => {
-        if (playerData && playerData.id && playerData.id !== socket.id) {
+        const myId = socket ? socket.id : null;
+        if (playerData && playerData.id) {
+            if (myId && playerData.id === myId) return;
             otherPlayers[playerData.id] = playerData;
             renderMultiplayerWidget();
         }
@@ -884,11 +880,11 @@ function updatePowerupHud() {
 function renderMultiplayerWidget() {
     if (!mpPlayerList) return;
     mpPlayerList.innerHTML = '';
-
     if (!playerName) return;
 
+    const myId = socket ? socket.id : 'me';
     const allList = [{
-        id: 'me',
+        id: myId,
         name: playerName,
         characterId: selectedChar,
         score: score,
@@ -897,21 +893,31 @@ function renderMultiplayerWidget() {
     }];
 
     for (let id in otherPlayers) {
-        if (socket && id !== socket.id) {
-            allList.push({
-                id: id,
-                name: otherPlayers[id].name || 'Oyuncu',
-                characterId: otherPlayers[id].characterId || 'classic',
-                score: otherPlayers[id].score || 0,
-                isAlive: otherPlayers[id].isAlive !== false,
-                isMe: false
-            });
+        if (id !== myId) {
+            const op = otherPlayers[id];
+            if (op) {
+                allList.push({
+                    id: id,
+                    name: op.name || 'Oyuncu',
+                    characterId: op.characterId || 'classic',
+                    score: op.score || 0,
+                    isAlive: op.isAlive !== false,
+                    isMe: false
+                });
+            }
         }
     }
 
-    allList.sort((a, b) => b.score - a.score);
+    const seen = new Set();
+    const uniqueList = allList.filter(p => {
+        if (seen.has(p.id)) return false;
+        seen.add(p.id);
+        return true;
+    });
 
-    allList.forEach(p => {
+    uniqueList.sort((a, b) => b.score - a.score);
+
+    uniqueList.forEach(p => {
         const row = document.createElement('div');
         row.className = `mp-player-row ${p.isMe ? 'is-me' : ''}`;
         const charIcon = CHAR_INFO[p.characterId] ? CHAR_INFO[p.characterId].icon : '✨';
