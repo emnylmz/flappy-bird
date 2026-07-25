@@ -289,15 +289,21 @@ let lastTimestamp = performance.now();
 
 let selectedBg = 'emin_sena';
 
-// Global Event Delegation (Tüm Tıklamaları ve Dokunmaları Kesin Algılar)
-document.addEventListener('click', (e) => {
+let lastVoiceToggleTime = 0;
+function handleVoiceToggle(e) {
     const voiceBtn = e.target.closest('.voice-btn');
     if (voiceBtn) {
-        e.preventDefault();
-        e.stopPropagation();
+        const now = Date.now();
+        if (now - lastVoiceToggleTime < 400) return;
+        lastVoiceToggleTime = now;
         toggleVoiceChat();
-        return;
     }
+}
+
+document.addEventListener('touchend', handleVoiceToggle);
+
+document.addEventListener('click', (e) => {
+    handleVoiceToggle(e);
 
     const charCard = e.target.closest('.char-card');
     if (charCard) {
@@ -315,13 +321,6 @@ document.addEventListener('click', (e) => {
         return;
     }
 });
-
-document.addEventListener('touchstart', (e) => {
-    const voiceBtn = e.target.closest('.voice-btn');
-    if (voiceBtn) {
-        e.stopPropagation();
-    }
-}, { passive: true });
 
 playerNameInput.addEventListener('input', () => {
     if (playerNameInput.value.trim() !== '') {
@@ -786,11 +785,7 @@ function createPeerConnection(peerId, isInitiator) {
     return pc;
 }
 
-if (btnVoiceToggle) {
-    btnVoiceToggle.addEventListener('click', () => {
-        toggleVoiceChat();
-    });
-}
+
 
 if (socket) {
     socket.on('voiceSignal', async (data) => {
